@@ -2,8 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Painel de Agendamento</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <title>Painel de Agendamentos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -89,55 +88,59 @@
 <div id="lista"></div>
 
 <footer>
-  Sistema de Agendamento • Integrado ao Telegram
+  Sistema de Agendamento • Integrado ao Backend
 </footer>
 
 <script>
-  const tg = Telegram.WebApp;
-  tg.expand();
-
   const API_URL = "http://localhost:8000";
 
   async function carregarAgendamentos() {
-    const res = await fetch(`${API_URL}/agendamentos`);
-    const dados = await res.json();
+    try {
+      const res = await fetch(`${API_URL}/agendamentos`);
+      const dados = await res.json();
 
-    const lista = document.getElementById("lista");
-    lista.innerHTML = "";
+      const lista = document.getElementById("lista");
+      lista.innerHTML = "";
 
-    dados.forEach(ag => {
-      const card = document.createElement("div");
-      card.className = "card";
+      if (dados.length === 0) {
+        lista.innerHTML = "<p>Nenhum agendamento encontrado.</p>";
+        return;
+      }
 
-      card.innerHTML = `
-        <div class="cliente">👤 ${ag.nome}</div>
-        <div class="info">💼 ${ag.servico}</div>
-        <div class="info">⏰ ${ag.hora} - ${ag.data}</div>
-        <div class="info">📌 Status: ${ag.status}</div>
-        <div class="botoes">
-          <button class="confirmar" onclick="aprovar(${ag.id})">Confirmar</button>
-          <button class="cancelar" onclick="cancelar(${ag.id})">Cancelar</button>
-        </div>
-      `;
+      dados.forEach(ag => {
+        const card = document.createElement("div");
+        card.className = "card";
 
-      lista.appendChild(card);
-    });
+        card.innerHTML = `
+          <div class="cliente">👤 ${ag.nome}</div>
+          <div class="info">💼 ${ag.servico}</div>
+          <div class="info">⏰ ${ag.hora} - ${ag.data}</div>
+          <div class="info">📌 Status: ${ag.status}</div>
+          <div class="botoes">
+            <button class="confirmar" onclick="aprovar(${ag.id})">Confirmar</button>
+            <button class="cancelar" onclick="cancelar(${ag.id})">Cancelar</button>
+          </div>
+        `;
+
+        lista.appendChild(card);
+      });
+    } catch (e) {
+      document.getElementById("lista").innerHTML = "<p>Erro ao carregar dados da API.</p>";
+      console.error(e);
+    }
   }
 
   async function aprovar(id) {
     await fetch(`${API_URL}/aprovar/${id}`, { method: "PUT" });
-    tg.showAlert("Agendamento aprovado!");
     carregarAgendamentos();
   }
 
   async function cancelar(id) {
-    tg.showConfirm("Deseja cancelar este agendamento?", async (ok) => {
-      if (ok) {
-        await fetch(`${API_URL}/cancelar/${id}`, { method: "PUT" });
-        tg.showAlert("Agendamento cancelado!");
-        carregarAgendamentos();
-      }
-    });
+    const ok = confirm("Deseja cancelar este agendamento?");
+    if (ok) {
+      await fetch(`${API_URL}/cancelar/${id}`, { method: "PUT" });
+      carregarAgendamentos();
+    }
   }
 
   carregarAgendamentos();
