@@ -71,10 +71,6 @@
       color: white;
     }
 
-    button:hover {
-      opacity: 0.9;
-    }
-
     footer {
       text-align: center;
       font-size: 12px;
@@ -90,26 +86,7 @@
   <p>Gerencie seus atendimentos</p>
 </header>
 
-<!-- CARD DE AGENDAMENTO -->
-<div class="card">
-  <div class="cliente">👤 João Silva</div>
-  <div class="info">💼 Corte de cabelo</div>
-  <div class="info">⏰ 14:00 - 10/02/2026</div>
-  <div class="botoes">
-    <button class="confirmar" onclick="confirmar('João Silva')">Confirmar</button>
-    <button class="cancelar" onclick="cancelar('João Silva')">Cancelar</button>
-  </div>
-</div>
-
-<div class="card">
-  <div class="cliente">👤 Ana Souza</div>
-  <div class="info">💼 Barba</div>
-  <div class="info">⏰ 15:00 - 10/02/2026</div>
-  <div class="botoes">
-    <button class="confirmar" onclick="confirmar('Ana Souza')">Confirmar</button>
-    <button class="cancelar" onclick="cancelar('Ana Souza')">Cancelar</button>
-  </div>
-</div>
+<div id="lista"></div>
 
 <footer>
   Sistema de Agendamento • Integrado ao Telegram
@@ -119,20 +96,52 @@
   const tg = Telegram.WebApp;
   tg.expand();
 
-  function confirmar(nome) {
-    tg.showAlert("Atendimento de " + nome + " confirmado!");
+  const API_URL = "http://localhost:8000";
+
+  async function carregarAgendamentos() {
+    const res = await fetch(`${API_URL}/agendamentos`);
+    const dados = await res.json();
+
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    dados.forEach(ag => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <div class="cliente">👤 ${ag.nome}</div>
+        <div class="info">💼 ${ag.servico}</div>
+        <div class="info">⏰ ${ag.hora} - ${ag.data}</div>
+        <div class="info">📌 Status: ${ag.status}</div>
+        <div class="botoes">
+          <button class="confirmar" onclick="aprovar(${ag.id})">Confirmar</button>
+          <button class="cancelar" onclick="cancelar(${ag.id})">Cancelar</button>
+        </div>
+      `;
+
+      lista.appendChild(card);
+    });
   }
 
-  function cancelar(nome) {
-    tg.showConfirm("Deseja cancelar o atendimento de " + nome + "?", function(ok) {
+  async function aprovar(id) {
+    await fetch(`${API_URL}/aprovar/${id}`, { method: "PUT" });
+    tg.showAlert("Agendamento aprovado!");
+    carregarAgendamentos();
+  }
+
+  async function cancelar(id) {
+    tg.showConfirm("Deseja cancelar este agendamento?", async (ok) => {
       if (ok) {
-        tg.showAlert("Atendimento de " + nome + " cancelado.");
+        await fetch(`${API_URL}/cancelar/${id}`, { method: "PUT" });
+        tg.showAlert("Agendamento cancelado!");
+        carregarAgendamentos();
       }
     });
   }
+
+  carregarAgendamentos();
 </script>
 
 </body>
 </html>
-
-
