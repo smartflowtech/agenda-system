@@ -1,1 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel de Agendamento</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f4f8;
+      margin: 0;
+      padding: 15px;
+      color: #333;
+    }
+
+    header {
+      text-align: center;
+      padding: 10px 0;
+      margin-bottom: 15px;
+    }
+
+    header h2 {
+      margin: 0;
+      color: #0088cc;
+    }
+
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.08);
+    }
+
+    .cliente {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .info {
+      margin-top: 5px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .botoes {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .confirmar {
+      background: #2ecc71;
+      color: white;
+    }
+
+    .cancelar {
+      background: #e74c3c;
+      color: white;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>📅 Painel de Agendamentos</h2>
+  <p>Gerencie seus atendimentos</p>
+</header>
+
+<!-- CARD DE AGENDAMENTO -->
+<div class="card">
+  <div class="cliente">👤 João Silva</div>
+  <div class="info">💼 Corte de cabelo</div>
+  <div class="info">⏰ 14:00 - 10/02/2026</div>
+  <div class="botoes">
+    <button class="confirmar" onclick="confirmar('João Silva')">Confirmar</button>
+    <button class="cancelar" onclick="cancelar('João Silva')">Cancelar</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="cliente">👤 Ana Souza</div>
+  <div class="info">💼 Barba</div>
+  <div class="info">⏰ 15:00 - 10/02/2026</div>
+  <div class="botoes">
+    <button class="confirmar" onclick="confirmar('Ana Souza')">Confirmar</button>
+    <button class="cancelar" onclick="cancelar('Ana Souza')">Cancelar</button>
+  </div>
+</div>
+
+<footer>
+  Sistema de Agendamento • Integrado ao Telegram
+</footer>
+
+<script>
+  const tg = Telegram.WebApp;
+  tg.expand();
+
+  function confirmar(nome) {
+    tg.showAlert("Atendimento de " + nome + " confirmado!");
+  }
+
+  function cancelar(nome) {
+    tg.showConfirm("Deseja cancelar o atendimento de " + nome + "?", function(ok) {
+      if (ok) {
+        tg.showAlert("Atendimento de " + nome + " cancelado.");
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
+
 
